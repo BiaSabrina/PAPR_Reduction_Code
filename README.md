@@ -1,7 +1,7 @@
-# Title: PAPR Reduction Technique for Mobile Communication Systems Using Neural Networks
-# Authors: Bianca S. de C. da Silva, Pedro H. C. de Souza, and Luciano L. Mendes
-# ID: 9381 
-# IEEE Latin America Transactions
+Title: PAPR Reduction Technique for Mobile Communication Systems Using Neural Networks
+Authors: Bianca S. de C. da Silva, Pedro H. C. de Souza, and Luciano L. Mendes
+ID: 9381 
+IEEE Latin America Transactions
 
 The code evaluates the performance of different techniques for reducing PAPR (Peak-to-Average Power Ratio) in OFDM systems, including the PTS (Partial Transmit Sequence), MCSA (Memoryless Continuous Search Algorithm), DFT Spread and a neural network (NN)-based approach. For each method, the PAPR ratio is calculated, which is a fundamental metric for evaluating the transmission efficiency of OFDM signals, in addition to the bit error rate (BER), which indicates the reliability of the system in the presence of noise.
 
