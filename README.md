@@ -6,7 +6,7 @@
 
 ## 📄 Overview
 
-This repository contains the script **`Generate_PAPR_BER_Complexity_Acc_Loss`**, which provides a complete framework to reproduce the simulation results presented in the manuscript.
+This repository contains the script **`Generate_PAPR_BER_Complexity_Acc_Loss.py`**, which provides a complete framework to reproduce the simulation results presented in the manuscript.
 
 The study investigates several techniques for reducing the **Peak-to-Average Power Ratio (PAPR)** in **OFDM systems**, including:
 
