@@ -5,7 +5,7 @@
 **Submitted to:** IEEE Latin America Transactions
 
 ## Overview
-This repository contains all the scripts and resources required to reproduce the simulation results presented in the manuscript. The study evaluates several techniques for PAPR (Peak-to-Average Power Ratio) reduction in OFDM systems, including:
+This repository contains all the scripts and resources required to reproduce the simulation results presented in the manuscript in only one code. The study evaluates several techniques for PAPR (Peak-to-Average Power Ratio) reduction in OFDM systems, including:
 
 - Neural Network (NN)-based approach
 - PTS (Partial Transmit Sequence)
