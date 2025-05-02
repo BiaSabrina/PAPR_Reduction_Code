@@ -25,7 +25,7 @@ All techniques are evaluated based on:
 - **Computational Complexity**
 
 ✅ Everything is implemented in **one unified script**:  
-`Generate_PAPR_BER_Complexity_Acc_Loss`
+`Generate_PAPR_BER_Complexity_Acc_Loss.py`
 
 ---
 
@@ -42,4 +42,4 @@ All techniques are evaluated based on:
 3. Run the following command:
 
 ```Python
-Generate_PAPR_BER_Complexity_Acc_Loss
+Generate_PAPR_BER_Complexity_Acc_Loss.py
