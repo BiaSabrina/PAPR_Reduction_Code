@@ -31,7 +31,7 @@ All techniques are evaluated based on:
 
 ## 📁 Files
 
-- `Generate_PAPR_BER_Complexity_Acc_Loss.m` – Main script that runs all simulations and generates plots for PAPR, BER, accuracy, loss and complexity analysis.
+- `Generate_PAPR_BER_Complexity_Acc_Loss.py` – Main script that runs all simulations and generates plots for PAPR, BER, accuracy, loss and complexity analysis.
 
 ---
 
