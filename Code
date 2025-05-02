@@ -203,7 +203,7 @@ for nt in range(0,Ntx):
     PAPR_final_no[nt]=PAPR_dB_red_no
     OFDM_final_no[nt]=OFDM_timee_no
     symbol_final_no[nt]=symbol_Ori_no
-    ind_complex_no[nt]=ic_no
+    ind_complex_no[nt]=ic_no # Complexity in terms of IFFT
     print('nt:', nt)
 CCDF_red_no = CCDF(PAPR_final_no)
 
@@ -323,7 +323,7 @@ for i in range(NN):
     
 CCDF_PTS_re = CCDF(papr_min)
 
-#%% PAPR, Accuracy and Loss
+#%% PAPR, Complexity, Accuracy and Loss
 
 fig, ax = plt.subplots(figsize=(10, 8))    
 ax.semilogy(np.arange(min(_PAPR_dB), max(_PAPR_dB), 0.00001), _CCDF, '-', color='C2', label=f'PAPR Original', linewidth=2.5)
@@ -348,6 +348,30 @@ ax.spines['right'].set_linewidth(2)
 ax.spines['left'].set_linewidth(2)
 ax.set_ylim([1e-3, 1])
 plt.savefig('PAPR.pdf', bbox_inches='tight', dpi=300)
+plt.show()
+
+num_carriers = np.arange(16, 66, 2)
+papr_target = np.linspace(5, 8, 25) 
+
+X, Y = np.meshgrid(num_portadoras, papr_alvo)
+
+Z = np.array(ind_complex_no) # We have to save the "ind_complex_no" for all "papr_target" and all "num_carriers" to put here.
+
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Superfície com colormap e transparência ajustados
+surf = ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='k', linewidth=0.3, alpha=0.85)
+
+ax.view_init(elev=35, azim=135)
+ax.set_xlabel('Number of Carriers', fontsize=12, fontweight='bold', labelpad=15)
+ax.set_ylabel(r'$\mathbf{\mathcal{P}_{max}}$', fontsize=16, fontweight='bold', labelpad=15)
+ax.set_zlabel('Average Iterations', fontsize=12, fontweight='bold', labelpad=10)
+ax.tick_params(axis='both', which='major', labelsize=10, pad=8)
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, pad=0.1)
+ax.set_facecolor('white')
+plt.savefig('3D_Average.pdf', bbox_inches='tight', dpi=300)
 plt.show()
 
 fig, ax = plt.subplots(figsize=(10, 8)) 
