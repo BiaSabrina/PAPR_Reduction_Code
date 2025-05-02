@@ -15,14 +15,14 @@ NUM_BITS_PER_SYMBOL = int(input("Number of Bits per Symbol: "))
 Np = int(input("Pilots Number: "))
 N = int(input("Carriers Number: "))
 
-M = 2**NUM_BITS_PER_SYMBOL # Ordem da modulação QAM.
+M = 2**NUM_BITS_PER_SYMBOL 
 
-Ntx=4500# Número de símbolos OFDM que serão gerados.
+Ntx=4500
 BLOCK_LENGTH = (N-Np)*NUM_BITS_PER_SYMBOL
 
-Eo = 1 # Menor energia de símbolo da constelação.
+Eo = 1 
 
-E = (2/3)*(M-1)*Eo # Energia de símbolo da constelação.
+E = (2/3)*(M-1)*Eo 
 
 constellation = sn.mapping.Constellation("qam", NUM_BITS_PER_SYMBOL) 
 constellation.show()
@@ -51,7 +51,7 @@ def pilot_value_change(batch, Np, pilots):
             matrix[i, j] = pilots[j]
     return matrix
 
-#%% Geração de bits e modulação:
+#%% Generation of bits and modulation:
     
 def Bits(batch, BL):
     binary_source = sn.utils.BinarySource()
@@ -96,7 +96,7 @@ def IFFTOri(symbol):
     OFDM_time__ = np.sqrt(N-Np) * np.fft.ifft(symbol).astype('complex64')   
     return OFDM_time__
 
-#%% Cálculo da PAPR e CCDF:
+#%%  PAPR and CCDF:
     
 def PAPR(info):
     idy = np.arange(0, info.shape[0]) 
@@ -229,7 +229,7 @@ optimizer = Adam(learning_rate=0.0001)
 model.compile(loss='MSE', optimizer=optimizer, metrics=['accuracy'])
 
 
-# Treinando o modelo
+# Training the Model:
 st = time.time()
 history = model.fit(dataset_original, dataset_otimizado, epochs= 3000, validation_data = [dataset_original, dataset_otimizado], verbose=2, shuffle=True)
 et = time.time()
@@ -323,7 +323,7 @@ for i in range(NN):
     
 CCDF_PTS_re = CCDF(papr_min)
 
-#%% PAPR, Complexity, Accuracy and Loss
+#%% PAPR, Complexity, Accuracy and Loss:
 
 fig, ax = plt.subplots(figsize=(10, 8))    
 ax.semilogy(np.arange(min(_PAPR_dB), max(_PAPR_dB), 0.00001), _CCDF, '-', color='C2', label=f'PAPR Original', linewidth=2.5)
