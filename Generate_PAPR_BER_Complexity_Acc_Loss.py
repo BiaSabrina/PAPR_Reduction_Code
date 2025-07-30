@@ -9,7 +9,8 @@ import time
 from keras.optimizers import Adam
 from keras.layers import Dense, Flatten
 from tensorflow.keras import Sequential
-
+from tensorflow.keras.losses import Huber
+from sklearn.model_selection import train_test_split
 
 NUM_BITS_PER_SYMBOL = int(input("Number of Bits per Symbol: "))
 Np = int(input("Pilots Number: "))
@@ -17,15 +18,8 @@ N = int(input("Carriers Number: "))
 
 M = 2**NUM_BITS_PER_SYMBOL 
 
-Ntx=4500
+Ntx=200000
 BLOCK_LENGTH = (N-Np)*NUM_BITS_PER_SYMBOL
-
-Eo = 1 
-
-E = (2/3)*(M-1)*Eo 
-
-constellation = sn.mapping.Constellation("qam", NUM_BITS_PER_SYMBOL) 
-constellation.show()
 
 cont = 0
 
@@ -147,11 +141,19 @@ _CCDF = CCDF(_PAPR_dB)
 
 Symbol_DFT = mod
 
+step = N // 4
+
+P1_DFT = Symbol_DFT[:, 0:step]
+P2_DFT = Symbol_DFT[:, step:2*step]
+P3_DFT = Symbol_DFT[:, 2*step:3*step]
+P4_DFT = Symbol_DFT[:, 3*step:N]
+
+'''
 P1_DFT = Symbol_DFT[:, 0:16]
 P2_DFT = Symbol_DFT[:, 16:32]
 P3_DFT = Symbol_DFT[:, 32:48]
 P4_DFT = Symbol_DFT[:, 48:62]
-
+'''
 Pt1 = FFTOri(P1_DFT)
 Pt2 = FFTOri(P2_DFT)
 Pt3 = FFTOri(P3_DFT)
@@ -177,7 +179,7 @@ ind_complex_no = np.zeros((Ntx,1))
 Pilots = []
 successful_pilots = np.zeros((Ntx,Np),dtype=complex)
 for Pil in range(0,Np):
-    Pilots.append(np.sqrt(E)*(np.random.randn() + 1j*np.random.randn()))
+    Pilots.append(np.sqrt(0.5)*(np.random.randn() + 1j*np.random.randn()))
 Pilots = np.array(Pilots)
 
 for nt in range(0,Ntx):
@@ -192,7 +194,7 @@ for nt in range(0,Ntx):
     while PAPR_dB_red_no > PAPR_dB_ref:     
         Pilots = []        
         for Pil in range(0,Np):
-            Pilots.append(np.sqrt(E)*(np.random.randn() + 1j*np.random.randn()))
+            Pilots.append(np.sqrt(0.5)*(np.random.randn() + 1j*np.random.randn()))
         Pilots = np.array(Pilots)        
         symbol_Ori_no = symbol(mapper_no, Pilots)
         OFDM_timee_no = IFFT(symbol_Ori_no) 
@@ -219,24 +221,26 @@ initializer = keras.initializers.glorot_normal(seed=25)
 dataset_original = np.c_[np.real(symbol_Ori_), np.imag(symbol_Ori_)]
 dataset_otimizado = np.c_[np.real(symbol_final_no), np.imag(symbol_final_no)]
 
+X_train, X_test, y_train, y_test = train_test_split(dataset_original, dataset_otimizado, test_size=0.3, random_state=40)
+
 model = Sequential()
 model.add(Flatten(input_shape=(dataset_original.shape[1],)))
 model.add(Dense(500, activation='relu', kernel_initializer=initializer))
 model.add(Dense(N*2, kernel_initializer=initializer))
 
-optimizer = Adam(learning_rate=0.0001)
+optimizer = Adam(learning_rate=0.001)
 
-model.compile(loss='MSE', optimizer=optimizer, metrics=['accuracy'])
+model.compile(loss=Huber(delta=1.0), optimizer=optimizer)
 
 
 # Training the Model:
 st = time.time()
-history = model.fit(dataset_original, dataset_otimizado, epochs= 3000, validation_data = [dataset_original, dataset_otimizado], verbose=2, shuffle=True)
+history = model.fit(X_train, y_train, epochs= 300, validation_split = 0.3, batch_size=64, verbose=1)
 et = time.time()
 elapsed_time = (et - st)/60
 print('Execution time:', elapsed_time, 'minutes')
 
-dataset = dataset_original   
+dataset = X_test   
 RED = model.predict(dataset)
 
 RED = RED[:,0:N] + 1j*RED[:,N:N*2]
@@ -287,11 +291,18 @@ for i in range(NN):
    papro = 10 * np.log10(peako/meano)
    
    # Partition OFDM Symbol
+   '''
    P1 = np.concatenate([ofdm_symbol[i, 0:16], np.zeros(46)])
    P2 = np.concatenate([np.zeros(16), ofdm_symbol[i, 16:32], np.zeros(30)])
    P3 = np.concatenate([np.zeros(32), ofdm_symbol[i, 32:48], np.zeros(14)])
    P4 = np.concatenate([np.zeros(48), ofdm_symbol[i, 48:62]])
-   
+   '''
+
+   P1 = np.concatenate([ofdm_symbol[i, 0:step], np.zeros(N - step)])
+   P2 = np.concatenate([np.zeros(step), ofdm_symbol[i, step:2*step], np.zeros(N - 2*step)])
+   P3 = np.concatenate([np.zeros(2*step), ofdm_symbol[i, 2*step:3*step], np.zeros(N - 3*step)])
+   P4 = np.concatenate([np.zeros(3*step), ofdm_symbol[i, 3*step:N]])
+
    Pt1 = (IFFTOri(P1))
    Pt2 = (IFFTOri(P2))
    Pt3 = (IFFTOri(P3))
@@ -398,28 +409,6 @@ plt.ylabel('Mean Square Error (MSE)', fontsize=17, fontweight='bold')
 plt.savefig('Loss.pdf', bbox_inches='tight', dpi=300)
 plt.show()
 
-fig, ax = plt.subplots(figsize=(10, 8)) 
-plt.semilogy(history.history['accuracy'], '-', color='blue', label='Training Accuracy')    
-plt.semilogy(history.history['val_accuracy'], '--', color='red', label='Validation Accuracy')
-plt.xlabel('Epochs', fontsize=17, fontweight='bold')
-ax.yaxis.grid(True, which='both', linestyle='--', alpha=0.7, color='gray')
-ax.yaxis.grid(True, which='minor', linestyle='--', alpha=0.5, color='gray')
-ax.grid(axis='both', linestyle='--', alpha=0.7, color='gray')
-ax.set_facecolor('white')
-ax.legend(loc='upper right', fontsize=17, bbox_to_anchor=(1.0, 1.0), frameon=True, facecolor='white', edgecolor='black')
-ax.spines['bottom'].set_color('black')
-ax.spines['top'].set_color('black')
-ax.spines['right'].set_color('black')
-ax.spines['left'].set_color('black')
-ax.spines['bottom'].set_linewidth(2)
-ax.spines['top'].set_linewidth(2)
-ax.spines['right'].set_linewidth(2)
-ax.spines['left'].set_linewidth(2)
-#ax.set_ylim([1e-3, 1])
-plt.ylabel('Accuracy', fontsize=17, fontweight='bold')
-plt.savefig('Accuracy.pdf', bbox_inches='tight', dpi=300)
-plt.show()
-
 #%% SNR x BER
 
 class UncodedSystemAWGN(Model): 
@@ -475,10 +464,13 @@ class UncodedSystemAWGN_pilots(Model):
         self.OFDM_RX_FD_Pil = IFFT_pilots_NN
         y_Pil = self.awgn_channel([self.OFDM_RX_FD_Pil, no*(N/(N-Np))]) # no = potência do ruído
         #rem_CP_Pil = Remove_CP(y_Pil)
-        y_Pil_fft= FFT(y_Pil)         
+        y_Pil_fft= FFT(y_Pil)     
+        mod_NN = X_test + 1j*X_test
+        mod_NN_without_pilots = np.delete(mod_NN, pilotCarriers,axis=1)
         y_without_pilots = np.delete(y_Pil_fft, pilotCarriers,axis=1)
+        bits_NN = self.demapper([mod_NN_without_pilots,no])   
         llr_pil = self.demapper([y_without_pilots,no])     
-        return bits, llr_pil
+        return bits_NN, llr_pil
 
 class UncodedSystemAWGN_Without_Memory(Model): 
     def __init__(self, num_bits_per_symbol, block_length,Subcarriers):
