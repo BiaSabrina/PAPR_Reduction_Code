@@ -113,7 +113,7 @@ def CCDF(PAPR_final):
     PAPR_Total_red = PAPR_final.size 
     mi = min(PAPR_final)
     ma = max(PAPR_final)
-    eixo_x_red = np.arange(mi, ma, 0.00001) 
+    eixo_x_red = np.arange(mi, ma, 0.1) 
     y_red = []
     for jj in eixo_x_red:
         A_red = len(np.where(PAPR_final > jj)[0])/PAPR_Total_red
